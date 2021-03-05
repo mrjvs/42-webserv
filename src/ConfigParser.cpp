@@ -10,24 +10,27 @@
 #include <string>
 #include <vector>
 
-ConfigParser::ConfigParser(const char* path, std::vector<Server*>& servers)
+namespace config
 {
-	int fd = -1;
-	struct stat sb;
-	std::string buf;
-	
-	if (path && stat(path, &sb) != -1)
-		fd = open(path, O_RDONLY);
-	if (fd < 0)
-		throw std::runtime_error("fail to open config file");
-
-	while (ft::getLine(fd, buf))
+	ConfigParser::ConfigParser(const char* path, std::vector<Server*>& servers)
 	{
-		if (buf == "server {")
+		int fd = -1;
+		struct stat sb;
+		std::string buf;
+		
+		if (path && stat(path, &sb) != -1)
+			fd = open(path, O_RDONLY);
+		if (fd < 0)
+			throw std::runtime_error("fail to open config file");
+
+		while (ft::getLine(fd, buf))
 		{
-			Server* tmp = new Server;
-			tmp->parse(fd);
-			servers.push_back(tmp);
+			if (buf == "server {")
+			{
+				Server* tmp = new Server;
+				tmp->parse(fd);
+				servers.push_back(tmp);
+			}
 		}
 	}
 }

@@ -5,54 +5,38 @@
 
 Location::Location() : _maxBody(0) {}
 
-Location::Location(const Location& rhs) {
-	(void)rhs;
-}
-
-Location::~Location() {}
-
-Location&	Location::operator=(const Location& rhs) {
-	(void)rhs;
-	return *this;
-}
-
-void		Location::setPrefix(const std::string& str) {
-	std::vector<std::string> tmp = ft::split(str, " \t\n");
-
-	if (tmp.size() > 2 || (tmp.size() == 2 && tmp[0][0] != '/'))
+void		Location::setPrefix(const std::vector<std::string>& args) {
+	if (args.size() != 3 || args[1][0] != '/')
 		throw std::runtime_error("prefix invalid");
-	if (tmp.size() == 2)
-		this->_prefix = tmp[0];
-	else
-		this->_prefix = "";
+	this->_prefix = args[1];
 }
 
-void		Location::setRoot(const std::string& str) {
-	std::vector<std::string> tmp = ft::split(str, " \t\n");
-	if (tmp.size() != 1)
+void		Location::setRoot(const std::vector<std::string>& args) {
+	if (args.size() != 2)
 		throw std::runtime_error("root invalid");
-	this->_root = tmp[0];
+	this->_root = args[1];
 }
 
-void		Location::setIndex(const std::string& str) {
-	this->_index = ft::split(str, " ");
+void		Location::setIndex(const std::vector<std::string>& args) {
+	this->_index = args;
 }
 
-void		Location::setAutoindex(const std::string& str) {
-	std::vector<std::string> tmp = ft::split(str, " \t\n");
-	if (tmp.size() != 1)
+void		Location::setAutoindex(const std::vector<std::string>& args) {
+	if (args.size() != 2)
 		throw std::runtime_error("Autoindex invalid");
-	this->_autoindex = tmp[0];
+	this->_autoindex = args[1];
 }
 
-void		Location::setMaxBody(const std::string& str) {
-	this->_maxBody = ft::stoi(str);
+void		Location::setMaxBody(const std::vector<std::string>& args) {
+	if (args.size() != 2)
+		throw std::runtime_error("maxBody invalid");
+	this->_maxBody = ft::stoi(args[1]);
 	if (!this->_maxBody)
 		throw std::runtime_error("maxBody invalid");
 }
 
-void		Location::setAllow_method(const std::string& str) {
-	this->_allow_method = ft::split(str, " ");
+void		Location::setAllow_method(const std::vector<std::string>& args) {
+	this->_allow_method.assign(args.begin()+1, args.end());
 }
 
 std::string					Location::getPrefix() const { return this->_prefix; }
@@ -70,7 +54,7 @@ std::ostream&		operator<<(std::ostream& o, const Location& x)
 		<<	"\tAutoindex: " 		<< x.getAutoindex()		<< std::endl
 		<<	"\tIndex: " 			<< x.getIndex()			<< std::endl
 		<<	"\tMaxBody: " 			<< x.getMaxBody()		<< std::endl
-		<<	"\tAllow methods: "		<< x.getAllow_method();
+		<<	"\tAllow methods: "		<< x.getAllow_method()	<< std::endl;
 	return o;
 }
 

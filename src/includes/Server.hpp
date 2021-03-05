@@ -9,9 +9,6 @@ class Server
 	public:
 		Server();
 		explicit Server(int fd);
-		~Server();
-		Server(const Server& rhs);
-		Server& 		operator=(const Server& rhs);
 
 		void			parse(int fd);
 
@@ -43,11 +40,11 @@ class Server
 		// 							_autoindex;
 		// int							_fd,
 		// 							_socketFd;
+		// std::vector<std::string> 	_indexes;
+		// struct sockaddr_in			addr;
 };
 
 std::ostream&		operator<<(std::ostream& o, const std::vector<Server*>& serv);
 
 std::ostream&		operator<<(std::ostream& o, const std::vector<Location*>& serv);
 
-// std::vector<std::string> 	_indexes;
-// struct sockaddr_in			addr;

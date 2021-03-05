@@ -7,17 +7,15 @@ class Location
 {
 	public:
 		Location();
-		Location(const Location& rhs);
-		~Location();
 
 		Location&	operator=(const Location& rhs);
 
-		void		setPrefix(const std::string& str);
-		void		setRoot(const std::string& str);
-		void		setIndex(const std::string& str);
-		void		setAutoindex(const std::string& str);
-		void		setMaxBody(const std::string& str);
-		void		setAllow_method(const std::string& str);
+		void		setPrefix(const std::vector<std::string>& args);
+		void		setRoot(const std::vector<std::string>& args);
+		void		setIndex(const std::vector<std::string>& args);
+		void		setAutoindex(const std::vector<std::string>& args);
+		void		setMaxBody(const std::vector<std::string>& args);
+		void		setAllow_method(const std::vector<std::string>& args);
 
 		std::string					getPrefix() const;
 		std::string					getRoot() const;
@@ -29,7 +27,9 @@ class Location
 	private:
 		std::string					_prefix,
 									_root,
-									_autoindex;
+									_autoindex,
+									_default_cgi_path,
+									_php_cgi;
 		std::vector<std::string>	_allow_method; //
 		std::vector<std::string>	_index;
 		size_t						_maxBody;
@@ -38,6 +38,3 @@ class Location
 std::ostream&		operator<<(std::ostream& o, const Location& x);
 
 std::ostream&		operator<<(std::ostream& o, const std::vector<std::string>& x);
-
-// template <class C>
-// std::ostream&		operator<<(std::ostream& o, const std::vector<C>& x);

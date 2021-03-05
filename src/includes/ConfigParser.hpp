@@ -4,17 +4,13 @@
 
 #include "Server.hpp"
 
-class ConfigParser
+namespace config
 {
-	public:
-		ConfigParser(const char* path, std::vector<Server*>& servers);
-		ConfigParser(const ConfigParser& rhs) {
-			(void)rhs;
-		}
-		~ConfigParser() {}
+	class ConfigParser
+	{
+		public:
+			ConfigParser(const char* path, std::vector<Server*>& servers);
+			~ConfigParser() {}
+	};
+}
 
-		ConfigParser& operator=(const ConfigParser& rhs) {
-			(void)rhs;
-			return *this;
-		}
-};

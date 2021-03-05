@@ -1,9 +1,14 @@
 NAME=not-apache
-INCLUDES=./includes/*.hpp
-FLAGS=-Wall -Wextra -Werror -std=c++98 -pedantic-errors -g -fsanitize=address
+INCLUDES=./src/includes
+FLAGS=-Wall -Wextra -Werror -std=c++98 -pedantic-errors
+DEBUG= -g -fsanitize=address
 CC=clang++
 
-HEADERS=*.hpp
+HEADERS=ConfigParser.hpp \
+		ft_utils.hpp \
+		getLine.hpp \
+		Location.hpp \
+		Server.hpp \
 
 FILES=\
 	main.cpp \
@@ -20,7 +25,7 @@ OBJS=$(FILES:.cpp=.o)
 all: $(NAME)
 
 $(NAME): $(OBJS) $(HEADERS)
-	$(CC) -I $(INCLUDES) $(FLAGS) -o $(NAME) $(OBJS)
+	$(CC) -I $(INCLUDES) $(FLAGS) $(DEBUG) -o $(NAME) $(OBJS)
 	rm -f $(OBJS)
 
 %.o: %.cpp $(HEADERS)

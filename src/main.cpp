@@ -10,16 +10,16 @@ int	main(int argc, char** argv)
 	try
 	{
 		if (argc != 2)
-			ConfigParser parse("config_files/config1.conf", servers);
+			config::ConfigParser parse("config_files/config1.conf", servers);
 		else
-			ConfigParser parse(argv[1], servers);
+			config::ConfigParser parse(argv[1], servers);
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
 	}
 	
-	std::cout << servers << std::endl;
+	std::cout << servers;
 
 	return (0);
 }

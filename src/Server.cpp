@@ -7,23 +7,6 @@
 
 Server::Server() {}
 
-Server::Server(int fd) {
-	(void)fd;
-}
-
-Server::~Server() {}
-
-Server::Server(const Server& rhs)
-{
-	(void)rhs;
-}
-
-Server& 	Server::operator=(const Server& rhs)
-{
-	(void)rhs;
-	return *this;
-}
-
 void		Server::getKeyAndValue(int fd, std::string& str, std::string& key, std::string& value)
 {
 	str = str.substr(1);
@@ -71,24 +54,29 @@ void		Server::parse(int fd)
 		throw std::runtime_error("invalid");
 }
 
+
 void	Server::setLocation(const std::string& str)
 {
 	Location* loc = new Location;
 	std::vector<std::string> locSettings = ft::split(str, "\t\n");
+	std::map<std::string, void(Location::*)(const std::vector<std::string>&)> set;
+
+	set["location"] = &Location::setPrefix;
+	set["root"] = &Location::setRoot;
+	set["allow_method"] = &Location::setAllow_method;
+	set["autoindex"] = &Location::setAutoindex;
+	set["index"] = &Location::setIndex;
+	set["maxBody"] = &Location::setMaxBody;
 
 	for (size_t i = 0; i < locSettings.size(); ++i) {
-		if (locSettings[i].find("location ", 0, 9) != std::string::npos)
-			loc->setPrefix(locSettings[i].substr(9));
-		else if (locSettings[i].find("root ", 0, 5) != std::string::npos)
-			loc->setRoot(locSettings[i].substr(5));
-		else if (locSettings[i].find("allow_method ", 0, 13) != std::string::npos)
-			loc->setAllow_method(locSettings[i].substr(13));
-		else if (locSettings[i].find("autoindex ", 0, 10) != std::string::npos)
-			loc->setAutoindex(locSettings[i].substr(10));
-		else if (locSettings[i].find("index ", 0, 6) != std::string::npos)
-			loc->setIndex(locSettings[i].substr(6));
-		else if (locSettings[i].find("maxBody ", 0, 8) != std::string::npos)
-			loc->setMaxBody(locSettings[i].substr(8));
+		std::vector<std::string> args = ft::split(locSettings[i], " \t\n");
+		try {
+			(loc->*(set.at(args[0])))(args);
+		}
+		catch (const std::exception& e) {
+			std::runtime_error("* unknown key in config file *");
+			// std::cout << "* unknown key in config file *\n";
+		}
 	}
 	this->_locations.push_back(loc);
 }
