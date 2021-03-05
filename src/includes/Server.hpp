@@ -12,14 +12,14 @@ class Server
 
 		void			parse(int fd);
 
-		void			getKeyAndValue(int fd, std::string& str, std::string& key, std::string& value);
+		void			getKeyAndValues(int fd, std::string& line, std::string& key, std::vector<std::string>& values);
 
-		void			setPort(const std::string& str);
-		void			setHost(const std::string& str);
-		void			setServer_name(const std::string& str);
-		void			setError_page(const std::string& str);
-		void			setMaxfilesize(const std::string& str);
-		void			setLocation(const std::string& str);
+		void			setPort(const std::vector<std::string>& args);
+		void			setHost(const std::vector<std::string>& args);
+		void			setServer_name(const std::vector<std::string>& args);
+		void			setError_page(const std::vector<std::string>& args);
+		void			setMaxfilesize(const std::vector<std::string>& args);
+		void			setLocation(const std::vector<std::string>& args);
 
 		size_t						getPort() const;
 		std::string					getHost() const;

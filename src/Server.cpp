@@ -7,24 +7,25 @@
 
 Server::Server() {}
 
-void		Server::getKeyAndValue(int fd, std::string& str, std::string& key, std::string& value)
+void		Server::getKeyAndValues(int fd, std::string& line, std::string& key, std::vector<std::string>& values)
 {
-	str = str.substr(1);
-	key = str.substr(0, str.find_first_of(" \n\t"));
+	std::vector<std::string> args = ft::split(line, " \t");
+	key = args[0];
 	if (key == "location")
 	{
-		value = str.substr();
-		while (ft::getLine(fd, str) && str != "\t}")
-			value += str;
+		values.assign(args.begin()+1, args.end());
+		while (ft::getLine(fd, line) && line != "\t}")
+			values.push_back(line);
 	}
 	else
-		value = str.substr(str.find_last_of('\t')+1, str.length());
+		values.assign(args.begin()+1, args.end());
 }
 
 void		Server::parse(int fd)
 {
-	std::string str, key, value;
-	std::map<std::string, void(Server::*)(const std::string&)> set;
+	std::string line, key;
+	std::vector<std::string> values;
+	std::map<std::string, void(Server::*)(const std::vector<std::string>&)> set;
 
 	set["port"] = &Server::setPort;
 	set["host"] = &Server::setHost;
@@ -33,17 +34,17 @@ void		Server::parse(int fd)
 	set["max_filesize"] = &Server::setMaxfilesize;
 	set["location"] = &Server::setLocation;
 	
-	while (ft::getLine(fd, str))
+	while (ft::getLine(fd, line))
 	{
-		if (str.empty())
+		if (line.empty())
 			continue ;
-		if (str == "}")
+		if (line == "}")
 			break ;
-		else if (str[0] != '\t')
+		else if (line[0] != '\t')
 			throw std::runtime_error("invalid");
-		getKeyAndValue(fd, str, key, value);
+		getKeyAndValues(fd, line, key, values);
 		try {
-			(this->*(set.at(key)))(value);
+			(this->*(set.at(key)))(values);
 		}
 		catch (const std::exception& e) {
 			std::runtime_error("* unknown key in config file *");
@@ -55,10 +56,9 @@ void		Server::parse(int fd)
 }
 
 
-void	Server::setLocation(const std::string& str)
+void	Server::setLocation(const std::vector<std::string>& locSettings)
 {
 	Location* loc = new Location;
-	std::vector<std::string> locSettings = ft::split(str, "\t\n");
 	std::map<std::string, void(Location::*)(const std::vector<std::string>&)> set;
 
 	set["location"] = &Location::setPrefix;
@@ -81,29 +81,29 @@ void	Server::setLocation(const std::string& str)
 	this->_locations.push_back(loc);
 }
 
-void	Server::setPort(const std::string& str)
+void	Server::setPort(const std::vector<std::string>& args)
 {
-	this->_port = ft::stoi(str);
+	this->_port = ft::stoi(args[0]);
 }
 
-void	Server::setHost(const std::string& str)
+void	Server::setHost(const std::vector<std::string>& args)
 {
-	this->_host = str;
+	this->_host = args[0];
 }
 
-void	Server::setServer_name(const std::string& str)
+void	Server::setServer_name(const std::vector<std::string>& args)
 {
-	this->_server_name = str;
+	this->_server_name = args[0];
 }
 
-void	Server::setError_page(const std::string& str)
+void	Server::setError_page(const std::vector<std::string>& args)
 {
-	this->_error_page = str;
+	this->_error_page = args[0];
 }
 
-void	Server::setMaxfilesize(const std::string& str)
+void	Server::setMaxfilesize(const std::vector<std::string>& args)
 {
-	this->_maxfilesize = ft::stoi(str);
+	this->_maxfilesize = ft::stoi(args[0]);
 }
 
 size_t						Server::getPort() const { return this->_port; }

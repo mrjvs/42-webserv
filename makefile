@@ -26,7 +26,6 @@ all: $(NAME)
 
 $(NAME): $(OBJS) $(HEADERS)
 	$(CC) -I $(INCLUDES) $(FLAGS) $(DEBUG) -o $(NAME) $(OBJS)
-	rm -f $(OBJS)
 
 %.o: %.cpp $(HEADERS)
 	$(CC) -I $(INCLUDES) $(FLAGS) -c -o $@ $<
