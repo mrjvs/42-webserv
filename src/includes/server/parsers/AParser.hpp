@@ -7,7 +7,6 @@
 
 #include "server/Client.hpp"
 #include <vector>
-#include <map>
 
 namespace NotApache {
 

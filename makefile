@@ -41,7 +41,9 @@ SRC	=\
 	server/listeners/TCPListener.cpp\
 	server/listeners/TerminalListener.cpp\
 	server/parsers/AParser.cpp\
+	server/parsers/Request.cpp\
 	server/parsers/HTTPParser.cpp\
+	server/parsers/ft_utils.cpp\
 	server/parsers/TerminalParser.cpp\
 	server/responders/AResponder.cpp\
 	server/responders/HTTPResponder.cpp\
@@ -60,7 +62,9 @@ HEADERS	=\
 	server/listeners/TCPListener.hpp\
 	server/listeners/TerminalListener.hpp\
 	server/parsers/AParser.hpp\
+	server/parsers/Request.hpp\
 	server/parsers/HTTPParser.hpp\
+	server/parsers/ft_utils.hpp\
 	server/parsers/TerminalParser.hpp\
 	server/responders/AResponder.hpp\
 	server/responders/HTTPResponder.hpp\

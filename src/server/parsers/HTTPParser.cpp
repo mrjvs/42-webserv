@@ -3,168 +3,136 @@
 //
 
 #include "server/parsers/HTTPParser.hpp"
+#include "server/parsers/ft_utils.hpp"
 
 #include <iostream>
 
-namespace NotApache
-{
-    std::string methodAsString(const e_method& in) {
-        switch (in) {
-            case GET:
-                return "GET";
-            case HEAD:
-                return "HEAD";
-            case POST:
-                return "POST";
-            case PUT:
-                return "PUT";
-            default:
-                return "INVALID METHOD";
-        }
-    }
-
-	template <typename T>
-	std::ostream& operator<<(std::ostream& o, const std::vector<T>& x) {
-		for (size_t i = 0; i < x.size(); ++i)
-			o << x[i] << std::endl;
-		return o;
-	}
-}
-
 using namespace NotApache;
 
-std::vector<std::string>        split(const std::string& str, const std::string& del)
-{
-    size_t start = 0, end = 0;
-    std::vector<std::string> array;
+HTTPParser::HTTPParser(): AParser(CONNECTION, "HTTP") {}
 
-    while (end != str.npos)
-    {
-        start = str.find_first_not_of(del, end);
-        end = str.find_first_of(del, start);
-		if (end != std::string::npos || start != std::string::npos)
-        	array.push_back(str.substr(start, end - start));
-    }
-    return array;
-}
 
-HTTPParser::HTTPParser(): AParser(CONNECTION, "HTTP") {
-	methodMap["GET"] = GET; // These are mandatory according to rfc's
-    methodMap["HEAD"] = HEAD; // These are mandatory according to rfc's
-    methodMap["PUT"] = PUT;
-    methodMap["DELETE"] = DELETE;
-    methodMap["CONNECT"] = CONNECT;
-    methodMap["OPTIONS"] = OPTIONS;
-    methodMap["TRACE"] = TRACE;
-    methodMap["ERROR"] = ERROR;
-}
-
-int		HTTPParser::parseRequestLine(std::string& reqLine) const {
-    std::vector<std::string> parts = split(reqLine, " ");
-	if (parts.size() != 3)
-		return INVALID; //ENUM ERROR
+int		HTTPParser::formatCheckReqLine(const std::string& reqLine) const {
+	// CHECKING GLOBAL FORMAT
+	size_t spaces = ft::countWS(reqLine);
+    std::vector<std::string> parts = ft::split(reqLine, " ");
+	if (spaces != 2 || parts.size() != 3) {
+		std::cout << "Invalid request line" << std::endl;
+		return INVALID;
+	}
 	
 	// CHECK METHOD
-	//if (parts[0].length() > 7) check len here?
-	if (methodMap.find(parts[0]) == methodMap.end())
-		return INVALID; //ENUM ERROR
+	size_t i = 0;
+	for (; parts[0][i]; ++i) {
+		if (!std::isupper(parts[0][i])) {
+			std::cout << "Method format error" << std::endl;
+			return INVALID;
+		}
+	}
+
+	// CHECK URI
+	if (parts[1][0] != '/') {
+		std::cout << "Invalid uri" << std::endl;
+		return INVALID;
+	}
 	
-	if (parts[1][0] != '/')
-		return INVALID; //ENUM ERROR
+	// CHECK PROTOCOL
+	size_t pos = parts[2].find("HTTP/");
+	if (pos == std::string::npos) {
+		std::cout << "Invalid protocol" << std::endl;
+		return INVALID;
+	}
 	
-	if (parts[2] != HTTP_VERSION) //TYPEDEF
-		return INVALID; //ENUM ERROR
+	// CHECK VERSION
+	pos += 5;
+	if (!std::isdigit(parts[2][pos]) && parts[2][pos+1] != '.' && !std::isdigit(parts[2][pos+2])){
+		std::cout << "Invalid version format" << std::endl;
+		return INVALID;
+	}
+
+	return VALID;
+}
+
+int		HTTPParser::formatCheckHeaders(const std::string& line) const {
+	int ret = VALID;
+	std::vector<std::string> headers = ft::split(line, "\r\n");
+
+	for (size_t i = 0; i < headers.size(); ++i) {
+		if (headers[i].find(":") == std::string::npos) {
+			std::cout << "no \":\" in header line" << std::endl;
+			return INVALID;
+		}
+		//Check for spaces in field-name
+		if (ft::countWS(headers[i].substr(0, headers[i].find_first_of(":")))) {
+			std::cout << "Spaces in field-name" << std::endl;
+			return INVALID;
+		}
+		
+		if (headers[i].find("TRANSFER-ENCODING:", 0, 18) != std::string::npos && headers[i].find("chunked") != std::string::npos) {
+			std::cout << "Chunked" << std::endl;
+			ret = CHUNKED;
+		}
+		
+		if (headers[i].find("CONTENT-LENGTH:", 0, 15) != std::string::npos) {
+			if (ret == CHUNKED) {
+				std::cout << "Headers Transfer-encoding + Content-length not allowed" << std::endl;
+				return INVALID; //Can't have both CONTENT-LENGTH and TRANSFER-ENCODING
+			}
+			else
+				ret = BODY;
+		}
+	}
+	return ret;
+}
+
+int		HTTPParser::formatCheckBody(const std::string& body) const {
+	(void)body;
 	return VALID;
 }
 
 AParser::formatState HTTPParser::formatCheck(Client &client) const {
-    const std::string   expected = "GET / HTTP/1.1\n";
-    //const std::string   &request = client.getRequest();
-	(void)client;
-    const std::string   &request = "\nGET / HTTP/1.1\r\n";
+    AParser::formatState ret = FINISHED;
+	size_t EOR = 0; // End Of Requestline
+	size_t EOH = 0; // End Of Headerfield
+	size_t EOB = 0; // End Of Body
 
-	std::cout << request << std::endl;
-    std::vector<std::string> line = split(request, "\r\n");
-	
-	if (parseRequestLine(line[0])) {
-		std::cout << "ERRORTJE\n";
-		return PARSE_ERROR;
+	const std::string   &request = client.getRequest();
+
+	EOR = request.find("\r\n");
+	if (EOR == std::string::npos) {
+		std::cout << "No \"\r\n\" in request" << std::endl;
+		return UNFINISHED;
 	}
 
-	//std::cout << parts << std::endl;
+	EOR += 2;
+	if (formatCheckReqLine(request.substr(0, EOR)))
+		return PARSE_ERROR;
+	
+	EOH = request.find("\r\n\r\n", EOR);
+	if (EOH == std::string::npos) {
+		std::cout << "Request line only" << std::endl;
+		return FINISHED;
+	}
 
+	int check = formatCheckHeaders(request.substr(EOR, EOH - EOR));
+	if (check == INVALID) {
+		std::cout << "Invalid header format" << std::endl;
+		return PARSE_ERROR;
+	}
+	else if (check == CHUNKED) {
+			EOB = request.find_last_of("\r\n", request.find_last_of("\r\n")-2)+1;
+			size_t end = request.find_last_of("\r\n")-1;
+			size_t bodySize = ft::stoi(request.substr(EOB, end-EOB));
+		if (bodySize != 0) {
+			std::cout << "UNFINISHED" << std::endl;
+			ret = UNFINISHED;
+		}
+	}
+	else if (check == BODY)
+		if (formatCheckBody(request.substr(EOH))) {
+			std::cout << "Invalid body format" << std::endl;
+			return PARSE_ERROR;
+		}
 
-
-
-	//this->methodMap.at(parts[0]);
-
-	// CHECK
-
-
-    for (std::string::size_type i = 0; i < request.length(); ++i) {
-        if (i >= expected.length())
-            return FINISHED;
-        if (request[i] != expected[i])
-            return PARSE_ERROR;
-    }
-
-    if (expected.length() == request.length())
-        return FINISHED;
-    return UNFINISHED;
+	return ret;
 }
-
-
-
-/*
-    GET / HTTP/1.1\r\n
-    
-    request-line   = method SP request-target SP HTTP-version CRLF
-    
-    A request-line begins with a method token, followed by a single space
-    (SP), the request-target, another single space (SP), the protocol
-    version, and ends with CRLF (\r\n)
-
-   +---------+-------------------------------------------------+-------+
-   | Method  | Description                                     | Sec.  |
-   +---------+-------------------------------------------------+-------+
-   | GET     | Transfer a current representation of the target | 4.3.1 |
-   |         | resource.                                       |       |
-   | HEAD    | Same as GET, but only transfer the status line  | 4.3.2 |
-   |         | and header section.                             |       |
-   | POST    | Perform resource-specific processing on the     | 4.3.3 |
-   |         | request payload.                                |       |
-   | PUT     | Replace all current representations of the      | 4.3.4 |
-   |         | target resource with the request payload.       |       |
-   | DELETE  | Remove all current representations of the       | 4.3.5 |
-   |         | target resource.                                |       |
-   | CONNECT | Establish a tunnel to the server identified by  | 4.3.6 |
-   |         | the target resource.                            |       |
-   | OPTIONS | Describe the communication options for the      | 4.3.7 |
-   |         | target resource.                                |       |
-   | TRACE   | Perform a message loop-back test along the path | 4.3.8 |
-   |         | to the target resource.                         |       |
-   +---------+-------------------------------------------------+-------+
-
-
-
-	If terminating the request message body with a line-ending is desired, then the user agent MUST
-	count the terminating CRLF octets as part of the message body length.
-
-	In the interest of robustness, a server that is expecting to receive
-   and parse a request-line SHOULD ignore at least one empty line (CRLF)
-   received prior to the request-line.
-
-
-    Although the request-line and status-line grammar rules require that
-   each of the component elements be separated by a single SP octet,
-   recipients MAY instead parse on whitespace-delimited word boundaries
-   and, aside from the CRLF terminator, treat any form of whitespace as
-   the SP separator while ignoring preceding or trailing whitespace;
-   such whitespace includes one or more of the following octets: SP,
-   HTAB, VT (%x0B), FF (%x0C), or bare CR.
-
-
-   A server that receives a request-target longer than any URI it wishes to parse MUST respond
-   with a 414 (URI Too Long) status code
-*/
-

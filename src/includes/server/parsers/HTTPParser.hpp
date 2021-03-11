@@ -10,36 +10,27 @@
 
 namespace NotApache {
 
-	#define HTTP_VERSION "HTTP/1.1"
+	class HTTPParser : public AParser {
+		enum e_ret {
+			VALID,
+			INVALID,
+			CHUNKED,
+			BODY
+		};
+		
+		public:
+			HTTPParser();
 
-	enum e_method {
-        GET,
-        HEAD,
-        POST,
-        PUT,
-        DELETE,
-        CONNECT,
-        OPTIONS,
-        TRACE,
-        ERROR
-    };
-
-	enum e_ret {
-		VALID,
-		INVALID
-	};
-
-	class HTTPParser: public AParser {
-	public:
-		HTTPParser();
-
-		AParser::formatState	formatCheck(Client &client) const;
-		int						parseRequestLine(std::string& reqLine) const;
-		std::map<std::string, e_method>	methodMap;
+			AParser::formatState	formatCheck(Client &client) const;
+			
+			int						formatCheckReqLine(const std::string& reqLine) const;
+			int						formatCheckHeaders(const std::string& line) const;
+			int						formatCheckBody(const std::string& line) const;
 	};
 
 	template <typename T>
-	std::ostream& operator<<(const std::ostream&, const std::vector<T>& x);
+	std::ostream& operator<<(std::ostream& o, const std::vector<T>& x);
+
 }
 
 #endif //HTTPPARSER_HPP

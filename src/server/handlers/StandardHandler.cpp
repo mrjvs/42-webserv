@@ -3,6 +3,8 @@
 //
 
 #include "server/handlers/StandardHandler.hpp"
+#include "server/parsers/HTTPParser.hpp"
+#include "server/parsers/Request.hpp"
 #include <unistd.h>
 
 using namespace NotApache;
@@ -32,7 +34,12 @@ void StandardHandler::read(Client &client) {
 	}
 
 	// parsing
-	AParser::formatState state = AParser::runFormatChecks(*_parsers, client);
+	AParser::formatState state = AParser::runFormatChecks(*_parsers, client);	
+	
+	Request request;
+	request.parseRequest(client.getRequest());
+
+	std::cout << request << std::endl;
 	if (state == AParser::FINISHED) {
 		// has read full data, start responding. client now contains data type
 		logItem(logger::DEBUG, "Client data has been parsed");
@@ -46,6 +53,8 @@ void StandardHandler::read(Client &client) {
 		client.setResponseState(PARSE_ERROR);
 		return;
 	}
+
+
 
 	// handle timeout
 	client.timeout();
