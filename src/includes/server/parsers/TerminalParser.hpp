@@ -13,7 +13,7 @@ namespace NotApache {
 	public:
 		TerminalParser();
 
-		AParser::formatState	formatCheck(Client &client) const;
+		AParser::formatState	formatCheck(Client &client);
 	};
 }
 

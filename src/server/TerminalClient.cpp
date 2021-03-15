@@ -16,8 +16,8 @@ void TerminalClient::close(bool reachedEOF) {
 		setState(CLOSED);
 		return;
 	}
-	const std::string &request = getRequest();
-	setRequest(request.substr(request.find('\n')+1));
+	const std::string &request = getRawRequest();
+	setRawRequest(request.substr(request.find('\n')+1));
 	setState(READING);
 }
 

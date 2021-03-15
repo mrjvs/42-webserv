@@ -5,11 +5,9 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
-#include "server/parsers/AParser.hpp"
-#include "server/parsers/HTTPParser.hpp"
 #include "server/parsers/ft_utils.hpp"
-#include <map>
 
+#include <map>
 #include <iostream>
 
 namespace NotApache {

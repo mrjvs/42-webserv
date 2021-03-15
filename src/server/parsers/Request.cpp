@@ -4,8 +4,6 @@
 
 #include "server/parsers/Request.hpp"
 
-#include <iostream>
-
 namespace NotApache
 {
     std::string methodAsString(const e_method& in) {

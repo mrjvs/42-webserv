@@ -12,7 +12,7 @@ using namespace NotApache;
 HTTPParser::HTTPParser(): AParser(CONNECTION, "HTTP") {}
 
 
-int		HTTPParser::formatCheckReqLine(const std::string& reqLine) const {
+int		HTTPParser::formatCheckReqLine(const std::string& reqLine) {
 	// CHECKING GLOBAL FORMAT
 	size_t spaces = ft::countWS(reqLine);
     std::vector<std::string> parts = ft::split(reqLine, " ");
@@ -25,7 +25,7 @@ int		HTTPParser::formatCheckReqLine(const std::string& reqLine) const {
 	size_t i = 0;
 	for (; parts[0][i]; ++i) {
 		if (!std::isupper(parts[0][i])) {
-			std::cout << "Method format error" << std::endl;
+			logItem(logger::DEBUG, "Method format error");
 			return INVALID;
 		}
 	}
@@ -53,7 +53,7 @@ int		HTTPParser::formatCheckReqLine(const std::string& reqLine) const {
 	return VALID;
 }
 
-int		HTTPParser::formatCheckHeaders(const std::string& line) const {
+int		HTTPParser::formatCheckHeaders(const std::string& line) {
 	int ret = VALID;
 	std::vector<std::string> headers = ft::split(line, "\r\n");
 
@@ -85,22 +85,22 @@ int		HTTPParser::formatCheckHeaders(const std::string& line) const {
 	return ret;
 }
 
-int		HTTPParser::formatCheckBody(const std::string& body) const {
+int		HTTPParser::formatCheckBody(const std::string& body) {
 	(void)body;
 	return VALID;
 }
 
-AParser::formatState HTTPParser::formatCheck(Client &client) const {
+AParser::formatState HTTPParser::formatCheck(Client &client) {
     AParser::formatState ret = FINISHED;
 	size_t EOR = 0; // End Of Requestline
 	size_t EOH = 0; // End Of Headerfield
 	size_t EOB = 0; // End Of Body
 
-	const std::string   &request = client.getRequest();
+	const std::string   &request = client.getRawRequest();
 
 	EOR = request.find("\r\n");
 	if (EOR == std::string::npos) {
-		std::cout << "No \"\r\n\" in request" << std::endl;
+		std::cout << "No \"\\r\\n\" in request" << std::endl;
 		return UNFINISHED;
 	}
 

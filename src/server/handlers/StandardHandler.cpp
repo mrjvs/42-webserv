@@ -17,14 +17,14 @@ void StandardHandler::read(Client &client) {
 		case 0:
 			// connection closed
 			logItem(logger::DEBUG, "Reached EOF of client");
-			logItem(logger::DEBUG, "Client data:\n" + client.getRequest());
+			logItem(logger::DEBUG, "Client data:\n" + client.getRawRequest());
 			client.close(true);
 			return;
 		case -1:
 			// TODO error WOULD_BLOCK on terminal EOF with still data to read (example "command here\n unfinished(EOF)")
 			// error reading
 			logItem(logger::WARNING, "Failed to read from client");
-			logItem(logger::DEBUG, client.getRequest());
+			logItem(logger::DEBUG, client.getRawRequest());
 			return;
 		default:
 			// packet found, reading
@@ -33,13 +33,12 @@ void StandardHandler::read(Client &client) {
 			break;
 	}
 
-	// parsing
-	AParser::formatState state = AParser::runFormatChecks(*_parsers, client);	
+	// checking format
+	AParser::formatState state = AParser::runFormatChecks(*_parsers, client);
 	
-	Request request;
-	request.parseRequest(client.getRequest());
+	// parsing
+	client.setRequest();
 
-	std::cout << request << std::endl;
 	if (state == AParser::FINISHED) {
 		// has read full data, start responding. client now contains data type
 		logItem(logger::DEBUG, "Client data has been parsed");

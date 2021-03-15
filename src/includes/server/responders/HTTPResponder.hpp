@@ -6,6 +6,7 @@
 #define HTTPRESPONDER_HPP
 
 #include "server/responders/AResponder.hpp"
+#include "server/parsers/Request.hpp"
 
 namespace NotApache {
 
@@ -17,7 +18,6 @@ namespace NotApache {
 		std::string	generateParseError(Client &client) const;
 		std::string	generateTimeout(Client &client) const;
 	};
-
 }
 
 #endif //HTTPRESPONDER_HPP

@@ -40,6 +40,7 @@ int main() {
 	server.addResponder(terminalResponder);
 
 	HTTPParser *httpParser = new HTTPParser();
+	httpParser->setLogger(logger);
 	TerminalParser *terminalParser = new TerminalParser();
 	server.addParser(httpParser);
 	server.addParser(terminalParser);

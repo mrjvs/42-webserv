@@ -8,7 +8,7 @@
 using namespace NotApache;
 
 Client::Client(FD readFD, FD writeFD, ClientTypes type): _readFD(readFD), _writeFD(writeFD), _type(type), _state(READING),
-_dataType(), _request(), _response(), _responseIndex(), _responseState(), _created(), _timeoutSeconds(0) {
+_dataType(), _rawRequest(), _response(), _responseIndex(), _responseState(), _created(), _timeoutSeconds(0), _request() {
 	::gettimeofday(&_created, NULL);
 }
 
@@ -37,15 +37,19 @@ void Client::setState(ClientStates state) {
 }
 
 void Client::appendRequest(const std::string &str) {
-	_request += str;
+	_rawRequest += str;
 }
 
-std::string Client::getRequest() const {
+std::string Client::getRawRequest() const {
+	return _rawRequest;
+}
+
+Request& Client::getRequest() {
 	return _request;
 }
 
-void Client::setRequest(const std::string &str) {
-	_request = str;
+void Client::setRawRequest(const std::string &str) {
+	_rawRequest = str;
 }
 
 ClientTypes Client::getType() const {
@@ -122,4 +126,8 @@ void Client::timeout() {
 
 const timeval &Client::getCreatedAt() const {
 	return _created;
+}
+
+void	Client::setRequest() {
+	_request.parseRequest(_rawRequest);
 }

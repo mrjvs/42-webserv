@@ -31,7 +31,7 @@ namespace NotApache {
 		virtual std::string	getDataType() const;
 		virtual void 		setType(ClientTypes type);
 
-		virtual formatState	formatCheck(Client &client) const = 0;
+		virtual formatState	formatCheck(Client &client) = 0;
 
 		static formatState	runFormatChecks(std::vector<AParser *> &parsers, Client &client);
 	};

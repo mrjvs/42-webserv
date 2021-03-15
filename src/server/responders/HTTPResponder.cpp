@@ -9,7 +9,9 @@ using namespace NotApache;
 HTTPResponder::HTTPResponder(): AResponder("HTTP") {}
 
 std::string HTTPResponder::generateResponse(Client &client) const {
-	(void)client;
+			
+	std::cout << client.getRequest() << std::endl;
+
 	return "HTTP response here\n";
 }
 

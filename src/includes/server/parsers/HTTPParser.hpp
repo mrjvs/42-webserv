@@ -6,11 +6,12 @@
 #define HTTPPARSER_HPP
 
 #include "server/parsers/AParser.hpp"
+#include "log/Loggable.hpp"
 #include <iostream>
 
 namespace NotApache {
 
-	class HTTPParser : public AParser {
+	class HTTPParser : public AParser, public logger::ILoggable {
 		enum e_ret {
 			VALID,
 			INVALID,
@@ -21,11 +22,11 @@ namespace NotApache {
 		public:
 			HTTPParser();
 
-			AParser::formatState	formatCheck(Client &client) const;
+			AParser::formatState	formatCheck(Client &client);
 			
-			int						formatCheckReqLine(const std::string& reqLine) const;
-			int						formatCheckHeaders(const std::string& line) const;
-			int						formatCheckBody(const std::string& line) const;
+			int						formatCheckReqLine(const std::string& reqLine);
+			int						formatCheckHeaders(const std::string& line);
+			int						formatCheckBody(const std::string& line);
 	};
 
 	template <typename T>
