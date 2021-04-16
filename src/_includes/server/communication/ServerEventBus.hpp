@@ -7,21 +7,24 @@
 
 #include <unistd.h>
 #include <exception>
+#include <map>
 #include "server/ServerTypes.hpp"
 
 namespace NotApache {
 
 	class ServerEventBus {
-	private:
-		FD _writeEnd;
-		FD _readEnd;
-
 	public:
 		enum Events {
 			CLIENT_STATE_UPDATED = 'a',
 			START_QUEUE = 'b'
 		};
 
+	private:
+		FD 							_writeEnd;
+		FD 							_readEnd;
+		std::map<Events,bool>		_queuedEvents;
+
+	public:
 		ServerEventBus();
 		virtual ~ServerEventBus();
 		/// will make a linked copy, posting an event can be read by both

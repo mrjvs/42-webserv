@@ -16,6 +16,8 @@ HTTPClient::HTTPClient(FD clientFd, int port, long host, sockaddr_in cli_addr): 
 	_timeoutAfter = 60; // timeout in seconds
     clientIdCounter++;
 	clientCount = clientIdCounter;
+	clock_gettime(CLOCK_REALTIME, &startTimeData);
+	timeLastKey = "Create";
 }
 
 HTTPClient::~HTTPClient() {
@@ -25,6 +27,7 @@ HTTPClient::~HTTPClient() {
 	_associatedFds.clear();
 	delete cgi;
 	delete proxy;
+	doTimeLog("Destroy");
 }
 
 FD HTTPClient::getFd() const {

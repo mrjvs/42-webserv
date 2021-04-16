@@ -15,6 +15,9 @@
 #include "config/blocks/RouteBlock.hpp"
 #include <vector>
 #include <netinet/in.h>
+#include <time.h>
+#include <stdio.h>
+#include <math.h>
 
 namespace NotApache {
 
@@ -58,6 +61,9 @@ namespace NotApache {
 		sockaddr_in					_cli_addr;
 
 	public:
+		std::string				timeLastKey;
+		timespec				startTimeData;
+		timespec				stopTimeData;
 		ClientWriteState		writeState;
 		ClientConnectionState	connectionState;
 		ClientResponseState		responseState;
@@ -96,6 +102,34 @@ namespace NotApache {
 		void 	    timeout(bool useLocks = true);
         long int    getTimeDiff() const;
         long int 	getTimeoutAfter() const;
+
+		# define timespec_diff_macro(a, b, result)                  \
+		  do {                                                \
+			(result)->tv_sec = (a)->tv_sec - (b)->tv_sec;     \
+			(result)->tv_nsec = (a)->tv_nsec - (b)->tv_nsec;  \
+			if ((result)->tv_nsec < 0) {                      \
+			  --(result)->tv_sec;                             \
+			  (result)->tv_nsec += 1000000000;                \
+			}                                                 \
+		  } while (0)
+
+        void 		doTimeLog(const char *str) {
+        	timespec diff = {};
+			long            ms; // Milliseconds
+			time_t          s;  // Seconds
+			clock_gettime(CLOCK_REALTIME, &stopTimeData);
+			timespec_diff_macro(&stopTimeData, &startTimeData, &diff);
+
+			s  = diff.tv_sec;
+			ms = round(diff.tv_nsec / 1.0e6); // Convert nanoseconds to milliseconds
+			if (ms > 999) {
+				s++;
+				ms = 0;
+			}
+//			printf("%25s -> %25s: %5lds %5ldms (%ld.%.9ld)\n", timeLastKey.c_str(), str, s, ms, diff.tv_sec, diff.tv_nsec);
+			clock_gettime(CLOCK_REALTIME, &startTimeData);
+			timeLastKey = str;
+        }
 	};
 
 }

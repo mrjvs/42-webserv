@@ -156,6 +156,7 @@ void StandardHandler::read(HTTPClient &client) {
 	client.isHandled.lock();
 	if (_parser->parse(client) == HTTPParser::READY_FOR_WRITE) {
 		client.connectionState = WRITING;
+		client.doTimeLog("read+parse");
 	}
 	stopHandle(client, false);
 }
@@ -224,6 +225,7 @@ void StandardHandler::write(HTTPClient &client) {
 	}
 	if (client.writeState == NO_RESPONSE) {
 		_responder->generateResponse(client);
+		client.doTimeLog("responseGen");
 		if (client.connectionState == ASSOCIATED_FD) {
 			stopHandle(client);
 			return;
@@ -232,6 +234,7 @@ void StandardHandler::write(HTTPClient &client) {
 	}
 	else if (client.writeState == GOT_ASSOCIATED) {
 		_responder->generateAssociatedResponse(client);
+		client.doTimeLog("associatedResponseGen");
 		if (client.connectionState == ASSOCIATED_FD) {
 			stopHandle(client);
 			return;
@@ -244,6 +247,7 @@ void StandardHandler::write(HTTPClient &client) {
 		if (ret != IO_ERROR)
 			client.concurrentFails = 0;
 		if (ret == IO_EOF) {
+			client.doTimeLog("writeFinish");
 			client.isHandled.lock();
 			client.connectionState = CLOSED;
 			stopHandle(client, false);

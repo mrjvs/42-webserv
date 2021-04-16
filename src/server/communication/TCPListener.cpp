@@ -36,6 +36,8 @@ void TCPListener::start() {
 	setsockopt(_fd, SOL_SOCKET, SO_KEEPALIVE, &one, sizeof(int)); // keep the connection alive
 	one = 1;
 	setsockopt(_fd, SOL_SOCKET, SO_OOBINLINE, &one, sizeof(int)); // receive urgent tcp data in normal queue (http doesnt work with urgent data)
+	one = 1;
+	setsockopt(_fd, SOL_SOCKET, SO_LINGER, &one, sizeof(int)); // make sure close will close at appropriate times
 	svr_addr.sin_family = AF_INET;
 	svr_addr.sin_addr.s_addr = _host;
 	svr_addr.sin_port = htons(_port);
