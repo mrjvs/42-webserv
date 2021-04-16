@@ -53,6 +53,15 @@ void HTTPResponder::prepareFile(HTTPClient &client, int code) {
 	}
 
 	// send file
+	// TODO TEMP CODE, REMOVE
+	if (client.data.request.data.uri.path == "/") {
+		client.data.response.setResponse(
+			client.data.response.builder
+				.setBody("<h1>Hello world</h1>")
+				.build()
+		);
+		return;
+	}
 	client.addAssociatedFd(fileFd);
 	client.responseState = NotApache::FILE;
 	client.connectionState = ASSOCIATED_FD;

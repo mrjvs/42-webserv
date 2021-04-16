@@ -126,7 +126,7 @@ namespace NotApache {
 				s++;
 				ms = 0;
 			}
-//			printf("%25s -> %25s: %5lds %5ldms (%ld.%.9ld)\n", timeLastKey.c_str(), str, s, ms, diff.tv_sec, diff.tv_nsec);
+			printf("%25s -> %25s: %5lds %5ldms (%ld.%.9ld)\n", timeLastKey.c_str(), str, s, ms, diff.tv_sec, diff.tv_nsec);
 			clock_gettime(CLOCK_REALTIME, &startTimeData);
 			timeLastKey = str;
         }
